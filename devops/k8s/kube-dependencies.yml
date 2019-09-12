@@ -1,0 +1,44 @@
+- hosts: ${HOST_TYPE}
+  become: yes
+  tasks:
+   - name: install Docker
+     apt:
+       name: docker.io
+       state: present
+       update_cache: true
+
+   - name: install APT Transport HTTPS
+     apt:
+       name: apt-transport-https
+       state: present
+
+   - name: add Kubernetes apt-key
+     apt_key:
+       url: ${URL_VALIDATE_APT_KEY}
+       state: present
+
+   - name: add Kubernetes' APT repository
+     apt_repository:
+      repo: deb ${URL_K8S_APT} kubernetes-xenial main
+      state: present
+      filename: 'kubernetes'
+
+   - name: install kubelet
+     apt:
+       name: kubelet=${VERSION_KUBLT}
+       state: present
+       update_cache: true
+
+   - name: install kubeadm
+     apt:
+       name: kubeadm=${VERSION_KUBADM}
+       state: present
+
+- hosts: ${HOST_TYPE}
+  become: yes
+  tasks:
+   - name: install kubectl
+     apt:
+       name: kubectl=${VERSION_KUBCTL}
+       state: present
+       force: yes

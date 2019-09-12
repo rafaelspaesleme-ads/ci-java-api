@@ -1,0 +1,31 @@
+- hosts: master
+  become: yes
+  tasks:
+    - name: initialize the cluster
+      shell: kubeadm init --pod-network-cidr=${HOST_1} >> cluster_initialized.log
+      args:
+        chdir: ${HOME}
+        creates: cluster_initialized.log
+
+    - name: create .kube directory
+      become: yes
+      become_user: ${USER}
+      file:
+        path: ${HOME}/.kube
+        state: directory
+        mode: ${CODE_CHMOD}
+
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/${USER}/.kube/config
+        remote_src: ${OPTION_REMOTE}
+        owner: ${USER}
+
+    - name: install Pod network
+      become: yes
+      become_user: ${USER}
+      shell: kubectl apply -f ${URL_TOKEN_POD_NET_SETUP} >> pod_network_setup.log
+      args:
+        chdir: ${HOME}
+        creates: pod_network_setup.log

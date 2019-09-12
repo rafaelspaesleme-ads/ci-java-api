@@ -1,0 +1,16 @@
+- hosts: ${HOST_TYPE}
+  become: yes
+  tasks:
+    - name: create the '${USER}' user
+      user: name=${USER} append=${APP_END} state=${STATE} createhome=${ACTIVE_HOME} shell=/bin/bash
+
+    - name: allow '${USER}' to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        line: '${USER} ALL=(${HOST_TYPE}) NOPASSWD: ${PASS_TYPE}'
+        validate: '${COMMAND_SUDO}'
+
+    - name: set up authorized keys for the ${USER} user
+      authorized_key: user=${USER} key="{{${KEY_USER}}}"
+      with_file:
+        - ~/.ssh/${NAME_KEY_USER}.pub
